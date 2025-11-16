@@ -97,7 +97,7 @@ export default function App() {
 
     const cx = S / 2;
     const cy = S / 2;
-    const radius = S * 0.48;
+    const radius = S * 0.5 - 6;
 
     ctx.save();
     ctx.beginPath();
