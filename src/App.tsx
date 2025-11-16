@@ -156,15 +156,17 @@ export default function App() {
     e.currentTarget.setPointerCapture(e.pointerId);
   }
 
-  function onPointerMove(e: React.PointerEvent<HTMLCanvasElement>) {
-    const s = dragState.current;
-    if (!s?.dragging) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientTarget ? (e.clientY - rect.top) : (e.clientY - rect.top); // fallback
-    setOffsetX(s.ox + (x - s.startX));
-    setOffsetY(s.oy + (y - s.startY));
-  }
+function onPointerMove(e: React.PointerEvent<HTMLCanvasElement>) {
+  const s = dragState.current;
+  if (!s?.dragging) return;
+
+  const rect = e.currentTarget.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+
+  setOffsetX(s.ox + (x - s.startX));
+  setOffsetY(s.oy + (y - s.startY));
+}
 
   function onPointerUp(e: React.PointerEvent<HTMLCanvasElement>) {
     dragState.current = null;
