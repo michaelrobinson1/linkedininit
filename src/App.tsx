@@ -1,12 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
 
-/**
- * LinkedIn-style Badge Overlay Generator — v2.0 (single format)
- * - One style only (official-style ring)
- * - Presets map to supplied PNG overlays (transparent rings)
- * - User uploads a photo, chooses a preset, exports PNG
- */
-
 const OVERLAYS: { key: string; label: string; src: string }[] = [
   { key: "nepobaby", label: "Nepo Baby", src: "/badges/nepobaby.png" },
   { key: "underresourced", label: "Under Resourced", src: "/badges/underresourced.png" },
@@ -30,7 +23,15 @@ export default function App() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const imgRef = useRef<HTMLImageElement | null>(null);
   const overlayRef = useRef<HTMLImageElement | null>(null);
+  const dragState = useRef<{
+    dragging: boolean;
+    startX: number;
+    startY: number;
+    ox: number;
+    oy: number;
+  } | null>(null);
 
+  // Preload overlays
   useEffect(() => {
     OVERLAYS.forEach((o) => {
       const im = new Image();
@@ -38,6 +39,7 @@ export default function App() {
     });
   }, []);
 
+  // Load base image
   useEffect(() => {
     if (!imageSrc) {
       draw();
@@ -52,6 +54,7 @@ export default function App() {
     img.src = imageSrc;
   }, [imageSrc]);
 
+  // Load selected overlay
   useEffect(() => {
     const src = OVERLAYS.find((o) => o.key === selectedKey)?.src;
     if (!src) {
@@ -67,6 +70,7 @@ export default function App() {
     img.src = src;
   }, [selectedKey]);
 
+  // Redraw when transforms change
   useEffect(() => {
     draw();
   }, [zoom, offsetX, offsetY, size]);
@@ -100,6 +104,7 @@ export default function App() {
     ctx.arc(cx, cy, radius, 0, Math.PI * 2);
     ctx.closePath();
     ctx.clip();
+
     if (imgRef.current) {
       const img = imgRef.current;
       const iw = img.width;
@@ -113,14 +118,17 @@ export default function App() {
       ctx.imageSmoothingQuality = "high";
       ctx.drawImage(img, dx, dy, drawW, drawH);
     }
+
     ctx.restore();
 
+    // Outer subtle ring
     ctx.beginPath();
     ctx.arc(cx, cy, radius + 6, 0, Math.PI * 2);
     ctx.strokeStyle = "#e5e7eb";
     ctx.lineWidth = 6;
     ctx.stroke();
 
+    // Overlay ring PNG
     if (overlayRef.current) {
       ctx.imageSmoothingQuality = "high";
       ctx.drawImage(overlayRef.current, 0, 0, S, S);
@@ -135,14 +143,6 @@ export default function App() {
     link.click();
   }
 
-  const dragState = useRef<{
-    dragging: boolean;
-    startX: number;
-    startY: number;
-    ox: number;
-    oy: number;
-  } | null>(null);
-
   function onPointerDown(e: React.PointerEvent<HTMLCanvasElement>) {
     if (!imageSrc) return;
     const rect = e.currentTarget.getBoundingClientRect();
@@ -156,17 +156,15 @@ export default function App() {
     e.currentTarget.setPointerCapture(e.pointerId);
   }
 
-function onPointerMove(e: React.PointerEvent<HTMLCanvasElement>) {
-  const s = dragState.current;
-  if (!s?.dragging) return;
-
-  const rect = e.currentTarget.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
-
-  setOffsetX(s.ox + (x - s.startX));
-  setOffsetY(s.oy + (y - s.startY));
-}
+  function onPointerMove(e: React.PointerEvent<HTMLCanvasElement>) {
+    const s = dragState.current;
+    if (!s?.dragging) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    setOffsetX(s.ox + (x - s.startX));
+    setOffsetY(s.oy + (y - s.startY));
+  }
 
   function onPointerUp(e: React.PointerEvent<HTMLCanvasElement>) {
     dragState.current = null;
@@ -175,21 +173,208 @@ function onPointerMove(e: React.PointerEvent<HTMLCanvasElement>) {
 
   const current = OVERLAYS.find((o) => o.key === selectedKey);
 
+  // ---------- STYLES ----------
+
+  const appStyle: React.CSSProperties = {
+    minHeight: "100vh",
+    margin: 0,
+    background: "#f8fafc",
+    color: "#0f172a",
+    fontFamily:
+      '"Source Sans 3", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    display: "flex",
+    flexDirection: "column",
+  };
+
+  const heroStyle: React.CSSProperties = {
+    backgroundImage:
+      "url('/assets/blue_bg.png'), linear-gradient(180deg, #00A0DC 0%, #0077B5 100%)",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    color: "#ffffff",
+  };
+
+  const heroInnerStyle: React.CSSProperties = {
+    maxWidth: 1120,
+    margin: "0 auto",
+    padding: "44px 24px 12px",
+  };
+
+  const heroTitleStyle: React.CSSProperties = {
+    fontFamily: "AlecrimBlack, system-ui, sans-serif",
+    fontWeight: 900,
+    fontSize: "44px",
+    lineHeight: 1,
+    letterSpacing: "-0.03em",
+  };
+
+  const mainWrapperStyle: React.CSSProperties = {
+    padding: "32px 24px 40px",
+    flex: 1,
+  };
+
+  const mainGridStyle: React.CSSProperties = {
+    maxWidth: 1120,
+    margin: "0 auto",
+    display: "grid",
+    gap: "16px",
+  };
+
+  const mainGridWide: React.CSSProperties = {
+    ...mainGridStyle,
+    gridTemplateColumns: "1.1fr 1fr",
+    alignItems: "flex-start",
+  };
+
+  const cardStyle: React.CSSProperties = {
+    background: "#ffffff",
+    borderRadius: 20,
+    padding: 24,
+    boxShadow: "0 18px 45px rgba(15, 23, 42, 0.12)",
+  };
+
+  const uploadRowStyle: React.CSSProperties = {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: 12,
+    marginBottom: 16,
+    alignItems: "center",
+  };
+
+  const btnBase: React.CSSProperties = {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 999,
+    padding: "7px 14px",
+    fontSize: 13,
+    border: "1px solid transparent",
+    cursor: "pointer",
+    whiteSpace: "nowrap",
+  };
+
+  const btnSecondary: React.CSSProperties = {
+    ...btnBase,
+    background: "#e5e7eb",
+    borderColor: "#e5e7eb",
+  };
+
+  const btnPrimary: React.CSSProperties = {
+    ...btnBase,
+    background: "#020617",
+    color: "#ffffff",
+    boxShadow: "0 10px 30px rgba(15, 23, 42, 0.4)",
+  };
+
+  const canvasShellStyle: React.CSSProperties = {
+    position: "relative",
+    background: "#e5e7eb",
+    borderRadius: 18,
+    overflow: "hidden",
+    aspectRatio: "1 / 1",
+    display: "grid",
+    placeItems: "center",
+  };
+
+  const canvasStyle: React.CSSProperties = {
+    width: "100%",
+    height: "100%",
+    maxWidth: 700,
+    display: "block",
+  };
+
+  const badgeGridStyle: React.CSSProperties = {
+    marginTop: 6,
+    display: "grid",
+    gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+    gap: 6,
+  };
+
+  const badgeBtn: React.CSSProperties = {
+    borderRadius: 999,
+    border: "1px solid #e5e7eb",
+    background: "#ffffff",
+    fontSize: 13,
+    padding: "6px 10px",
+    textAlign: "left",
+    cursor: "pointer",
+  };
+
+  const badgeBtnActive: React.CSSProperties = {
+    ...badgeBtn,
+    background: "#020617",
+    color: "#ffffff",
+    borderColor: "#020617",
+  };
+
+  const sliderStyle: React.CSSProperties = {
+    width: "100%",
+  };
+
+  const selectStyle: React.CSSProperties = {
+    marginTop: 4,
+    padding: "6px 8px",
+    borderRadius: 10,
+    border: "1px solid #e5e7eb",
+    fontSize: 13,
+    background: "#ffffff",
+  };
+
   return (
-    <div className="app-root">
-      {/* Hero */}
-      <section className="hero">
-        <div className="hero-inner">
-          <img src="/assets/innit_logo.png" alt="innit" className="hero-logo" />
-          <h1 className="hero-title">Linkedinnit</h1>
-          <p className="hero-tagline-main">Corporate realness.</p>
-          <p className="hero-tagline-sub">LinkedIn badges, but honest</p>
-          <p className="hero-footer">
+    <div style={appStyle}>
+      {/* Load fonts */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap');
+        @font-face {
+          font-family: 'AlecrimBlack';
+          src: url('/assets/fonts/Alecrim-Black.otf') format('opentype');
+          font-weight: 900;
+          font-style: normal;
+          font-display: swap;
+        }
+        canvas { image-rendering: auto; }
+      `}</style>
+
+      {/* HERO */}
+      <section style={heroStyle}>
+        <div style={heroInnerStyle}>
+          <img
+            src="/assets/innit_logo.png"
+            alt="innit"
+            style={{ height: 28, marginBottom: 16 }}
+          />
+          <h1 style={heroTitleStyle}>Linkedinnit</h1>
+          <p
+            style={{
+              marginTop: 10,
+              fontFamily: "AlecrimBlack, system-ui, sans-serif",
+              fontSize: 22,
+            }}
+          >
+            Corporate realness.
+          </p>
+          <p
+            style={{
+              marginTop: 4,
+              fontSize: 13,
+              opacity: 0.9,
+            }}
+          >
+            LinkedIn badges, but honest
+          </p>
+          <p
+            style={{
+              marginTop: 18,
+              fontSize: 11,
+              opacity: 0.85,
+            }}
+          >
             Made by{" "}
             <a
               href="https://www.mikeyrobinson.co.uk"
               target="_blank"
               rel="noreferrer"
+              style={{ color: "#ffffff", textDecoration: "underline" }}
             >
               Mikey Robinson
             </a>
@@ -197,85 +382,123 @@ function onPointerMove(e: React.PointerEvent<HTMLCanvasElement>) {
         </div>
       </section>
 
-      {/* Main content */}
-      <main className="main-wrapper">
-        <div className="main-grid">
-          <header className="main-header">
-            <h2 className="main-heading">Generator</h2>
-            <span className="version-pill">v2.0</span>
+      {/* MAIN */}
+      <main style={mainWrapperStyle}>
+        <div
+          style={
+            window.innerWidth >= 900 ? mainGridWide : mainGridStyle
+          }
+        >
+          {/* Header row */}
+          <header
+            style={{
+              gridColumn: "1 / -1",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: 4,
+            }}
+          >
+            <h2 style={{ fontSize: 20, fontWeight: 600, letterSpacing: "-0.02em" }}>
+              Generator
+            </h2>
+            <span style={{ fontSize: 12, opacity: 0.7 }}>v2.0</span>
           </header>
 
-          {/* Left card – canvas */}
-          <section className="card card-left">
-            <div className="upload-row">
-              <label className="btn btn-secondary">
+          {/* LEFT – Canvas card */}
+          <section style={cardStyle}>
+            <div style={uploadRowStyle}>
+              <label style={btnSecondary}>
                 <input
                   type="file"
                   accept="image/*"
-                  className="file-input"
                   onChange={onFile}
+                  style={{ display: "none" }}
                 />
                 Upload photo
               </label>
               <button
+                style={{
+                  ...btnPrimary,
+                  opacity: imageSrc ? 1 : 0.4,
+                  boxShadow: imageSrc ? btnPrimary.boxShadow : "none",
+                  cursor: imageSrc ? "pointer" : "default",
+                }}
                 disabled={!imageSrc}
                 onClick={download}
-                className="btn btn-primary"
               >
                 Download PNG
               </button>
             </div>
 
-            <div className="canvas-shell">
+            <div style={canvasShellStyle}>
               <canvas
                 ref={canvasRef}
-                className="canvas"
+                style={canvasStyle}
                 onPointerDown={onPointerDown}
                 onPointerMove={onPointerMove}
                 onPointerUp={onPointerUp}
               />
               {!imageSrc && (
-                <div className="canvas-placeholder">
-                  <p className="placeholder-title">
-                    Upload a profile picture to start
-                  </p>
-                  <p className="placeholder-text">
-                    Square images work best. Drag to reposition; use Zoom to
-                    scale.
-                  </p>
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    display: "grid",
+                    placeItems: "center",
+                    textAlign: "center",
+                    padding: 32,
+                    color: "#6b7280",
+                  }}
+                >
+                  <div>
+                    <p style={{ fontWeight: 600, marginBottom: 4 }}>
+                      Upload a profile picture to start
+                    </p>
+                    <p style={{ fontSize: 13 }}>
+                      Square images work best. Drag to reposition; use Zoom to scale.
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
           </section>
 
-          {/* Right card – controls */}
-          <aside className="card card-right">
-            <div className="control-block">
-              <label className="label">Badge preset</label>
-              <div className="badge-grid">
+          {/* RIGHT – Controls */}
+          <aside style={{ ...cardStyle, display: "flex", flexDirection: "column", gap: 16 }}>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>
+                Badge preset
+              </div>
+              <div style={badgeGridStyle}>
                 {OVERLAYS.map((o) => (
                   <button
                     key={o.key}
                     onClick={() => setSelectedKey(o.key)}
-                    className={
-                      "badge-btn" +
-                      (selectedKey === o.key ? " badge-btn--active" : "")
+                    style={
+                      selectedKey === o.key ? badgeBtnActive : badgeBtn
                     }
                   >
                     {o.label}
                   </button>
                 ))}
               </div>
-              <p className="selected-label">
+              <p style={{ marginTop: 6, fontSize: 12, color: "#6b7280" }}>
                 Selected: <strong>{current?.label}</strong>
               </p>
             </div>
 
-            <div className="control-grid">
-              <div className="control-block">
-                <div className="label-row">
-                  <span className="label">Zoom</span>
-                  <span className="value">{zoom.toFixed(2)}×</span>
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              <div>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    fontSize: 12,
+                  }}
+                >
+                  <span style={{ fontWeight: 600 }}>Zoom</span>
+                  <span style={{ color: "#6b7280" }}>{zoom.toFixed(2)}×</span>
                 </div>
                 <input
                   type="range"
@@ -284,13 +507,19 @@ function onPointerMove(e: React.PointerEvent<HTMLCanvasElement>) {
                   step={0.01}
                   value={zoom}
                   onChange={(e) => setZoom(parseFloat(e.target.value))}
-                  className="slider"
+                  style={sliderStyle}
                 />
               </div>
 
-              <div className="xy-grid">
-                <div className="control-block">
-                  <span className="label">Offset X</span>
+              <div
+                style={{
+                  display: "grid",
+                  gap: 12,
+                  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                }}
+              >
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 600 }}>Offset X</div>
                   <input
                     type="range"
                     min={-400}
@@ -298,11 +527,11 @@ function onPointerMove(e: React.PointerEvent<HTMLCanvasElement>) {
                     step={1}
                     value={offsetX}
                     onChange={(e) => setOffsetX(parseInt(e.target.value))}
-                    className="slider"
+                    style={sliderStyle}
                   />
                 </div>
-                <div className="control-block">
-                  <span className="label">Offset Y</span>
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 600 }}>Offset Y</div>
                   <input
                     type="range"
                     min={-400}
@@ -310,16 +539,16 @@ function onPointerMove(e: React.PointerEvent<HTMLCanvasElement>) {
                     step={1}
                     value={offsetY}
                     onChange={(e) => setOffsetY(parseInt(e.target.value))}
-                    className="slider"
+                    style={sliderStyle}
                   />
                 </div>
               </div>
             </div>
 
-            <div className="control-block">
-              <span className="label">Export size</span>
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 600 }}>Export size</div>
               <select
-                className="select"
+                style={selectStyle}
                 value={size}
                 onChange={(e) => setSize(parseInt(e.target.value))}
               >
@@ -331,315 +560,20 @@ function onPointerMove(e: React.PointerEvent<HTMLCanvasElement>) {
               </select>
             </div>
 
-            <div className="notice">
-              These presets use your supplied ring PNGs with transparent
-              backgrounds.
+            <div
+              style={{
+                paddingTop: 8,
+                marginTop: 4,
+                borderTop: "1px solid #e5e7eb",
+                fontSize: 12,
+                color: "#6b7280",
+              }}
+            >
+              These presets use your supplied ring PNGs with transparent backgrounds.
             </div>
           </aside>
         </div>
       </main>
-
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap');
-        @font-face {
-          font-family: 'AlecrimBlack';
-          src: url('/assets/fonts/Alecrim-Black.otf') format('opentype');
-          font-weight: 900;
-          font-style: normal;
-          font-display: swap;
-        }
-
-        .app-root {
-          min-height: 100vh;
-          margin: 0;
-          background: #f8fafc;
-          color: #0f172a;
-          font-family: 'Source Sans 3', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        }
-
-        .hero {
-          background-image: url('/assets/blue_bg.png'), linear-gradient(180deg, #00a0dc 0%, #0077b5 100%);
-          background-size: cover;
-          background-position: center;
-          color: #fff;
-        }
-
-        .hero-inner {
-          max-width: 1120px;
-          margin: 0 auto;
-          padding: 2.75rem 1.5rem 0.75rem;
-        }
-
-        .hero-logo {
-          height: 28px;
-          margin-bottom: 1rem;
-        }
-
-        .hero-title {
-          font-family: 'AlecrimBlack', system-ui, sans-serif;
-          font-weight: 900;
-          font-size: 2.75rem;
-          line-height: 1;
-          letter-spacing: -0.03em;
-        }
-
-        @media (min-width: 768px) {
-          .hero-title {
-            font-size: 4rem;
-          }
-        }
-
-        .hero-tagline-main {
-          margin-top: 0.75rem;
-          font-family: 'AlecrimBlack', system-ui, sans-serif;
-          font-size: 1.5rem;
-        }
-
-        .hero-tagline-sub {
-          margin-top: 0.35rem;
-          font-size: 0.9rem;
-          text-transform: none;
-          opacity: 0.9;
-        }
-
-        .hero-footer {
-          margin-top: 1.5rem;
-          font-size: 0.75rem;
-          opacity: 0.85;
-        }
-
-        .hero-footer a {
-          color: #ffffff;
-          text-decoration: underline;
-        }
-
-        .main-wrapper {
-          padding: 2.5rem 1.5rem 3rem;
-        }
-
-        .main-grid {
-          max-width: 1120px;
-          margin: 0 auto;
-          display: grid;
-          gap: 1.5rem;
-        }
-
-        @media (min-width: 900px) {
-          .main-grid {
-            grid-template-columns: 1.1fr 1fr;
-          }
-        }
-
-        .main-header {
-          grid-column: 1 / -1;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-        }
-
-        .main-heading {
-          font-size: 1.4rem;
-          font-weight: 600;
-          letter-spacing: -0.02em;
-        }
-
-        .version-pill {
-          font-size: 0.75rem;
-          opacity: 0.7;
-        }
-
-        .card {
-          background: #ffffff;
-          border-radius: 20px;
-          padding: 1.5rem;
-          box-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
-        }
-
-        .card-left {
-          min-height: 0;
-        }
-
-        .card-right {
-          display: flex;
-          flex-direction: column;
-          gap: 1.25rem;
-        }
-
-        .upload-row {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 0.75rem;
-          margin-bottom: 1rem;
-        }
-
-        .btn {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          border-radius: 999px;
-          padding: 0.45rem 0.95rem;
-          font-size: 0.85rem;
-          border: 1px solid transparent;
-          cursor: pointer;
-          white-space: nowrap;
-        }
-
-        .btn-secondary {
-          background: #e5e7eb;
-          border-color: #e5e7eb;
-        }
-
-        .btn-secondary:hover {
-          background: #d1d5db;
-        }
-
-        .btn-primary {
-          background: #020617;
-          color: #ffffff;
-          box-shadow: 0 10px 30px rgba(15, 23, 42, 0.4);
-        }
-
-        .btn-primary:disabled {
-          opacity: 0.4;
-          cursor: default;
-          box-shadow: none;
-        }
-
-        .file-input {
-          display: none;
-        }
-
-        .canvas-shell {
-          position: relative;
-          background: #e5e7eb;
-          border-radius: 18px;
-          overflow: hidden;
-          aspect-ratio: 1/1;
-          display: grid;
-          place-items: center;
-        }
-
-        .canvas {
-          width: 100%;
-          height: 100%;
-          max-width: 700px;
-          display: block;
-        }
-
-        .canvas-placeholder {
-          position: absolute;
-          inset: 0;
-          display: grid;
-          place-items: center;
-          text-align: center;
-          padding: 2rem;
-          color: #6b7280;
-        }
-
-        .placeholder-title {
-          font-weight: 600;
-          margin-bottom: 0.25rem;
-        }
-
-        .placeholder-text {
-          font-size: 0.85rem;
-        }
-
-        .control-block {
-          display: flex;
-          flex-direction: column;
-          gap: 0.4rem;
-        }
-
-        .label {
-          font-size: 0.8rem;
-          font-weight: 600;
-        }
-
-        .label-row {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-        }
-
-        .value {
-          font-size: 0.75rem;
-          color: #6b7280;
-        }
-
-        .badge-grid {
-          margin-top: 0.35rem;
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-          gap: 0.4rem;
-        }
-
-        .badge-btn {
-          border-radius: 999px;
-          border: 1px solid #e5e7eb;
-          background: #ffffff;
-          font-size: 0.8rem;
-          padding: 0.4rem 0.7rem;
-          text-align: left;
-          cursor: pointer;
-        }
-
-        .badge-btn:hover {
-          background: #f3f4f6;
-        }
-
-        .badge-btn--active {
-          background: #020617;
-          color: #ffffff;
-          border-color: #020617;
-        }
-
-        .selected-label {
-          margin-top: 0.35rem;
-          font-size: 0.75rem;
-          color: #6b7280;
-        }
-
-        .control-grid {
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-        }
-
-        .xy-grid {
-          display: grid;
-          gap: 0.75rem;
-        }
-
-        @media (min-width: 600px) {
-          .xy-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-          }
-        }
-
-        .slider {
-          width: 100%;
-        }
-
-        .select {
-          margin-top: 0.25rem;
-          padding: 0.4rem 0.6rem;
-          border-radius: 10px;
-          border: 1px solid #e5e7eb;
-          font-size: 0.85rem;
-          background: #ffffff;
-        }
-
-        .notice {
-          padding-top: 0.6rem;
-          margin-top: 0.25rem;
-          border-top: 1px solid #e5e7eb;
-          font-size: 0.75rem;
-          color: #6b7280;
-        }
-
-        canvas { image-rendering: auto; }
-      `}</style>
     </div>
   );
 }
