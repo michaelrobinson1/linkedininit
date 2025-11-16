@@ -1,0 +1,1 @@
+Place your badge PNGs here (e.g., nepobaby.png, underpaid.png, ...).
