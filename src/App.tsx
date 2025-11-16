@@ -135,7 +135,14 @@ export default function App() {
     link.click();
   }
 
-  const dragState = useRef<{ dragging: boolean; startX: number; startY: number; ox: number; oy: number } | null>(null);
+  const dragState = useRef<{
+    dragging: boolean;
+    startX: number;
+    startY: number;
+    ox: number;
+    oy: number;
+  } | null>(null);
+
   function onPointerDown(e: React.PointerEvent<HTMLCanvasElement>) {
     if (!imageSrc) return;
     const rect = e.currentTarget.getBoundingClientRect();
@@ -148,15 +155,17 @@ export default function App() {
     };
     e.currentTarget.setPointerCapture(e.pointerId);
   }
+
   function onPointerMove(e: React.PointerEvent<HTMLCanvasElement>) {
     const s = dragState.current;
     if (!s?.dragging) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const y = e.clientTarget ? (e.clientY - rect.top) : (e.clientY - rect.top); // fallback
     setOffsetX(s.ox + (x - s.startX));
     setOffsetY(s.oy + (y - s.startY));
   }
+
   function onPointerUp(e: React.PointerEvent<HTMLCanvasElement>) {
     dragState.current = null;
     e.currentTarget.releasePointerCapture(e.pointerId);
@@ -165,93 +174,107 @@ export default function App() {
   const current = OVERLAYS.find((o) => o.key === selectedKey);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      {/* Full-width hero */}
-      <section
-        className="w-full"
-        style={{
-          backgroundImage:
-            "url('/assets/blue_bg.png'), linear-gradient(180deg, #00A0DC 0%, #0077B5 100%)",
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
-      >
-        <div className="max-w-6xl mx-auto px-6 pt-10 pb-2">
-          <img src="/assets/innit_logo.png" alt="innit" className="h-7 mb-4" />
-          <h1 className="text-white text-5xl md:text-7xl font-black tracking-tight leading-none">Linkedinnit</h1>
-          <p className="text-white mt-2 text-2xl" style={{fontFamily: 'AlecrimBlack, system-ui, sans-serif'}}>Corporate realness.</p>
-          <p className="text-white/80 text-sm md:text-base mt-2" style={{fontFamily: '"Source Sans 3", ui-sans-serif, system-ui'}}>LinkedIn badges, but honest</p>
-          <p className="text-white/80 text-xs mt-6">Made by <a href="https://www.mikeyrobinson.co.uk" target="_blank" rel="noreferrer" style={{textDecoration:'underline'}}>Mikey Robinson</a></p>
+    <div className="app-root">
+      {/* Hero */}
+      <section className="hero">
+        <div className="hero-inner">
+          <img src="/assets/innit_logo.png" alt="innit" className="hero-logo" />
+          <h1 className="hero-title">Linkedinnit</h1>
+          <p className="hero-tagline-main">Corporate realness.</p>
+          <p className="hero-tagline-sub">LinkedIn badges, but honest</p>
+          <p className="hero-footer">
+            Made by{" "}
+            <a
+              href="https://www.mikeyrobinson.co.uk"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Mikey Robinson
+            </a>
+          </p>
         </div>
       </section>
 
       {/* Main content */}
-      <div className="p-6 md:p-10">
-        <div className="max-w-6xl mx-auto grid gap-6 md:grid-cols-[1.1fr,1fr] items-start">
-          <header className="md:col-span-2 flex items-center justify-between">
-            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">Generator</h2>
-            <span className="text-sm opacity-70">v2.0</span>
+      <main className="main-wrapper">
+        <div className="main-grid">
+          <header className="main-header">
+            <h2 className="main-heading">Generator</h2>
+            <span className="version-pill">v2.0</span>
           </header>
 
-          <section className="bg-white rounded-2xl shadow p-4 md:p-6">
-            <div className="flex flex-wrap items-center gap-3 mb-4">
-              <label className="inline-flex items-center px-3 py-2 rounded-xl bg-slate-100 cursor-pointer hover:bg-slate-200">
-                <input type="file" accept="image/*" className="hidden" onChange={onFile} />
-                <span className="text-sm font-medium">Upload photo</span>
+          {/* Left card – canvas */}
+          <section className="card card-left">
+            <div className="upload-row">
+              <label className="btn btn-secondary">
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="file-input"
+                  onChange={onFile}
+                />
+                Upload photo
               </label>
-              <button disabled={!imageSrc} onClick={download} className="px-4 py-2 rounded-xl shadow bg-slate-900 text-white disabled:opacity-40">
+              <button
+                disabled={!imageSrc}
+                onClick={download}
+                className="btn btn-primary"
+              >
                 Download PNG
               </button>
             </div>
 
-            <div className="relative grid place-items-center bg-slate-100 rounded-2xl aspect-square overflow-hidden select-none">
+            <div className="canvas-shell">
               <canvas
                 ref={canvasRef}
-                className="w-full h-full max-w-[700px]"
+                className="canvas"
                 onPointerDown={onPointerDown}
                 onPointerMove={onPointerMove}
                 onPointerUp={onPointerUp}
               />
               {!imageSrc && (
-                <div className="absolute inset-0 grid place-items-center text-center p-8 text-slate-500">
-                  <div>
-                    <p className="font-medium">Upload a profile picture to start</p>
-                    <p className="text-sm mt-1">Square images work best. Drag to reposition; use Zoom to scale.</p>
-                  </div>
+                <div className="canvas-placeholder">
+                  <p className="placeholder-title">
+                    Upload a profile picture to start
+                  </p>
+                  <p className="placeholder-text">
+                    Square images work best. Drag to reposition; use Zoom to
+                    scale.
+                  </p>
                 </div>
               )}
             </div>
           </section>
 
-          <aside className="bg-white rounded-2xl shadow p-4 md:p-6 space-y-6">
-            <div>
-              <label className="text-sm font-medium">Badge preset</label>
-              <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2">
+          {/* Right card – controls */}
+          <aside className="card card-right">
+            <div className="control-block">
+              <label className="label">Badge preset</label>
+              <div className="badge-grid">
                 {OVERLAYS.map((o) => (
                   <button
                     key={o.key}
                     onClick={() => setSelectedKey(o.key)}
-                    className={`px-3 py-2 rounded-xl text-sm border text-left ${
-                      selectedKey === o.key
-                        ? "bg-slate-900 text-white border-slate-900"
-                        : "bg-white hover:bg-slate-50"
-                    }`}
+                    className={
+                      "badge-btn" +
+                      (selectedKey === o.key ? " badge-btn--active" : "")
+                    }
                   >
                     {o.label}
                   </button>
                 ))}
               </div>
-              <p className="text-xs text-slate-500 mt-2">
+              <p className="selected-label">
                 Selected: <strong>{current?.label}</strong>
               </p>
             </div>
 
-            <div className="grid gap-4">
-              <div>
-                <label className="text-sm font-medium flex justify-between">
-                  <span>Zoom</span>
-                  <span className="text-slate-500">{zoom.toFixed(2)}×</span>
-                </label>
+            <div className="control-grid">
+              <div className="control-block">
+                <div className="label-row">
+                  <span className="label">Zoom</span>
+                  <span className="value">{zoom.toFixed(2)}×</span>
+                </div>
                 <input
                   type="range"
                   min={0.6}
@@ -259,12 +282,13 @@ export default function App() {
                   step={0.01}
                   value={zoom}
                   onChange={(e) => setZoom(parseFloat(e.target.value))}
-                  className="w-full"
+                  className="slider"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm">Offset X</label>
+
+              <div className="xy-grid">
+                <div className="control-block">
+                  <span className="label">Offset X</span>
                   <input
                     type="range"
                     min={-400}
@@ -272,11 +296,11 @@ export default function App() {
                     step={1}
                     value={offsetX}
                     onChange={(e) => setOffsetX(parseInt(e.target.value))}
-                    className="w-full"
+                    className="slider"
                   />
                 </div>
-                <div>
-                  <label className="text-sm">Offset Y</label>
+                <div className="control-block">
+                  <span className="label">Offset Y</span>
                   <input
                     type="range"
                     min={-400}
@@ -284,16 +308,16 @@ export default function App() {
                     step={1}
                     value={offsetY}
                     onChange={(e) => setOffsetY(parseInt(e.target.value))}
-                    className="w-full"
+                    className="slider"
                   />
                 </div>
               </div>
             </div>
 
-            <div>
-              <label className="text-sm">Export size</label>
+            <div className="control-block">
+              <span className="label">Export size</span>
               <select
-                className="w-full mt-1 border rounded-xl px-3 py-2"
+                className="select"
                 value={size}
                 onChange={(e) => setSize(parseInt(e.target.value))}
               >
@@ -305,12 +329,13 @@ export default function App() {
               </select>
             </div>
 
-            <div className="pt-2 border-t text-xs text-slate-500 space-y-1">
-              <p>These presets use your supplied ring PNGs with transparent backgrounds.</p>
+            <div className="notice">
+              These presets use your supplied ring PNGs with transparent
+              backgrounds.
             </div>
           </aside>
         </div>
-      </div>
+      </main>
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap');
@@ -321,6 +346,296 @@ export default function App() {
           font-style: normal;
           font-display: swap;
         }
+
+        .app-root {
+          min-height: 100vh;
+          margin: 0;
+          background: #f8fafc;
+          color: #0f172a;
+          font-family: 'Source Sans 3', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .hero {
+          background-image: url('/assets/blue_bg.png'), linear-gradient(180deg, #00a0dc 0%, #0077b5 100%);
+          background-size: cover;
+          background-position: center;
+          color: #fff;
+        }
+
+        .hero-inner {
+          max-width: 1120px;
+          margin: 0 auto;
+          padding: 2.75rem 1.5rem 0.75rem;
+        }
+
+        .hero-logo {
+          height: 28px;
+          margin-bottom: 1rem;
+        }
+
+        .hero-title {
+          font-family: 'AlecrimBlack', system-ui, sans-serif;
+          font-weight: 900;
+          font-size: 2.75rem;
+          line-height: 1;
+          letter-spacing: -0.03em;
+        }
+
+        @media (min-width: 768px) {
+          .hero-title {
+            font-size: 4rem;
+          }
+        }
+
+        .hero-tagline-main {
+          margin-top: 0.75rem;
+          font-family: 'AlecrimBlack', system-ui, sans-serif;
+          font-size: 1.5rem;
+        }
+
+        .hero-tagline-sub {
+          margin-top: 0.35rem;
+          font-size: 0.9rem;
+          text-transform: none;
+          opacity: 0.9;
+        }
+
+        .hero-footer {
+          margin-top: 1.5rem;
+          font-size: 0.75rem;
+          opacity: 0.85;
+        }
+
+        .hero-footer a {
+          color: #ffffff;
+          text-decoration: underline;
+        }
+
+        .main-wrapper {
+          padding: 2.5rem 1.5rem 3rem;
+        }
+
+        .main-grid {
+          max-width: 1120px;
+          margin: 0 auto;
+          display: grid;
+          gap: 1.5rem;
+        }
+
+        @media (min-width: 900px) {
+          .main-grid {
+            grid-template-columns: 1.1fr 1fr;
+          }
+        }
+
+        .main-header {
+          grid-column: 1 / -1;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+
+        .main-heading {
+          font-size: 1.4rem;
+          font-weight: 600;
+          letter-spacing: -0.02em;
+        }
+
+        .version-pill {
+          font-size: 0.75rem;
+          opacity: 0.7;
+        }
+
+        .card {
+          background: #ffffff;
+          border-radius: 20px;
+          padding: 1.5rem;
+          box-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
+        }
+
+        .card-left {
+          min-height: 0;
+        }
+
+        .card-right {
+          display: flex;
+          flex-direction: column;
+          gap: 1.25rem;
+        }
+
+        .upload-row {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.75rem;
+          margin-bottom: 1rem;
+        }
+
+        .btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 999px;
+          padding: 0.45rem 0.95rem;
+          font-size: 0.85rem;
+          border: 1px solid transparent;
+          cursor: pointer;
+          white-space: nowrap;
+        }
+
+        .btn-secondary {
+          background: #e5e7eb;
+          border-color: #e5e7eb;
+        }
+
+        .btn-secondary:hover {
+          background: #d1d5db;
+        }
+
+        .btn-primary {
+          background: #020617;
+          color: #ffffff;
+          box-shadow: 0 10px 30px rgba(15, 23, 42, 0.4);
+        }
+
+        .btn-primary:disabled {
+          opacity: 0.4;
+          cursor: default;
+          box-shadow: none;
+        }
+
+        .file-input {
+          display: none;
+        }
+
+        .canvas-shell {
+          position: relative;
+          background: #e5e7eb;
+          border-radius: 18px;
+          overflow: hidden;
+          aspect-ratio: 1/1;
+          display: grid;
+          place-items: center;
+        }
+
+        .canvas {
+          width: 100%;
+          height: 100%;
+          max-width: 700px;
+          display: block;
+        }
+
+        .canvas-placeholder {
+          position: absolute;
+          inset: 0;
+          display: grid;
+          place-items: center;
+          text-align: center;
+          padding: 2rem;
+          color: #6b7280;
+        }
+
+        .placeholder-title {
+          font-weight: 600;
+          margin-bottom: 0.25rem;
+        }
+
+        .placeholder-text {
+          font-size: 0.85rem;
+        }
+
+        .control-block {
+          display: flex;
+          flex-direction: column;
+          gap: 0.4rem;
+        }
+
+        .label {
+          font-size: 0.8rem;
+          font-weight: 600;
+        }
+
+        .label-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+
+        .value {
+          font-size: 0.75rem;
+          color: #6b7280;
+        }
+
+        .badge-grid {
+          margin-top: 0.35rem;
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+          gap: 0.4rem;
+        }
+
+        .badge-btn {
+          border-radius: 999px;
+          border: 1px solid #e5e7eb;
+          background: #ffffff;
+          font-size: 0.8rem;
+          padding: 0.4rem 0.7rem;
+          text-align: left;
+          cursor: pointer;
+        }
+
+        .badge-btn:hover {
+          background: #f3f4f6;
+        }
+
+        .badge-btn--active {
+          background: #020617;
+          color: #ffffff;
+          border-color: #020617;
+        }
+
+        .selected-label {
+          margin-top: 0.35rem;
+          font-size: 0.75rem;
+          color: #6b7280;
+        }
+
+        .control-grid {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .xy-grid {
+          display: grid;
+          gap: 0.75rem;
+        }
+
+        @media (min-width: 600px) {
+          .xy-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+        }
+
+        .slider {
+          width: 100%;
+        }
+
+        .select {
+          margin-top: 0.25rem;
+          padding: 0.4rem 0.6rem;
+          border-radius: 10px;
+          border: 1px solid #e5e7eb;
+          font-size: 0.85rem;
+          background: #ffffff;
+        }
+
+        .notice {
+          padding-top: 0.6rem;
+          margin-top: 0.25rem;
+          border-top: 1px solid #e5e7eb;
+          font-size: 0.75rem;
+          color: #6b7280;
+        }
+
         canvas { image-rendering: auto; }
       `}</style>
     </div>
