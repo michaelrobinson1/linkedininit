@@ -204,12 +204,13 @@ export default function App() {
     backgroundSize: "cover",
     backgroundPosition: "center",
     color: "#ffffff",
+    padding: "40px 0 56px", // reduced banner height
   };
 
   const heroInnerStyle: React.CSSProperties = {
     maxWidth: 1120,
     margin: "0 auto",
-    padding: "32px 24px 20px",
+    padding: "0 24px", // horizontal padding only
   };
 
   const heroTitleStyle: React.CSSProperties = {
