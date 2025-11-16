@@ -577,7 +577,7 @@ export default function App() {
                 color: "#6b7280",
               }}
             >
-              These presets use your supplied ring PNGs with transparent backgrounds.
+              Resize your image to fit your ego.
             </div>
           </aside>
         </div>
