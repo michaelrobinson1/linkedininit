@@ -494,7 +494,7 @@ export default function App() {
                       Upload a profile picture to start
                     </p>
                     <p style={{ fontSize: 13 }}>
-                      Square images work best. 
+                      Square images work best.<br></br> 
                       Drag to reposition; use Zoom to scale.
                     </p>
                   </div>
