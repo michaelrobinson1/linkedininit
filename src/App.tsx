@@ -70,7 +70,7 @@ export default function App() {
     img.src = src;
   }, [selectedKey]);
 
-  // Redraw when transforms change
+  // Redraw when transforms or size change
   useEffect(() => {
     draw();
   }, [zoom, offsetX, offsetY, size]);
@@ -171,6 +171,18 @@ export default function App() {
     e.currentTarget.releasePointerCapture(e.pointerId);
   }
 
+  function onPointerLeave() {
+    if (dragState.current?.dragging) {
+      dragState.current = null;
+    }
+  }
+
+  function resetTransforms() {
+    setZoom(1);
+    setOffsetX(0);
+    setOffsetY(0);
+  }
+
   const current = OVERLAYS.find((o) => o.key === selectedKey);
 
   // ---------- STYLES ----------
@@ -197,13 +209,13 @@ export default function App() {
   const heroInnerStyle: React.CSSProperties = {
     maxWidth: 1120,
     margin: "0 auto",
-    padding: "32px 24px 20px", // tighter vertically
+    padding: "32px 24px 20px",
   };
 
   const heroTitleStyle: React.CSSProperties = {
     fontFamily: "AlecrimBlack, system-ui, sans-serif",
     fontWeight: 900,
-    fontSize: "60px", // bigger, bolder
+    fontSize: "60px",
     lineHeight: 1,
     letterSpacing: "-0.03em",
   };
@@ -218,13 +230,6 @@ export default function App() {
     margin: "0 auto",
     display: "grid",
     gap: "16px",
-  };
-
-  // 50/50 split on larger screens
-  const mainGridWide: React.CSSProperties = {
-    ...mainGridStyle,
-    gridTemplateColumns: "1fr 1fr",
-    alignItems: "flex-start",
   };
 
   const cardStyle: React.CSSProperties = {
@@ -276,8 +281,8 @@ export default function App() {
     display: "grid",
     placeItems: "center",
     width: "100%",
-    maxWidth: 520,       // LIMIT PREVIEW SIZE
-    margin: "0 auto",    // center it
+    maxWidth: 520,
+    margin: "0 auto",
   };
 
   const canvasStyle: React.CSSProperties = {
@@ -325,7 +330,7 @@ export default function App() {
 
   return (
     <div style={appStyle}>
-      {/* Load fonts */}
+      {/* Load fonts & responsive grid CSS */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap');
         @font-face {
@@ -336,6 +341,20 @@ export default function App() {
           font-display: swap;
         }
         canvas { image-rendering: auto; }
+
+        .main-grid {
+          max-width: 1120px;
+          margin: 0 auto;
+          display: grid;
+          gap: 16px;
+        }
+
+        @media (min-width: 900px) {
+          .main-grid {
+            grid-template-columns: 1fr 1fr;
+            align-items: stretch; /* ensures both cards are same height */
+          }
+        }
       `}</style>
 
       {/* HERO */}
@@ -349,7 +368,7 @@ export default function App() {
           <h1 style={heroTitleStyle}>Linkedinnit</h1>
           <p
             style={{
-              marginTop: 12,
+              marginTop: 8, // tightened
               fontFamily: "AlecrimBlack, system-ui, sans-serif",
               fontSize: 26,
             }}
@@ -358,7 +377,7 @@ export default function App() {
           </p>
           <p
             style={{
-              marginTop: 6,
+              marginTop: 4, // tightened
               fontSize: 14,
               opacity: 0.9,
             }}
@@ -367,7 +386,7 @@ export default function App() {
           </p>
           <p
             style={{
-              marginTop: 18,
+              marginTop: 12, // tightened
               fontSize: 11,
               opacity: 0.85,
             }}
@@ -387,9 +406,7 @@ export default function App() {
 
       {/* MAIN */}
       <main style={mainWrapperStyle}>
-        <div
-          style={window.innerWidth >= 900 ? mainGridWide : mainGridStyle}
-        >
+        <div className="main-grid" style={mainGridStyle}>
           {/* Header row */}
           <header
             style={{
@@ -422,13 +439,25 @@ export default function App() {
                 style={{
                   ...btnPrimary,
                   opacity: imageSrc ? 1 : 0.4,
-                  boxShadow: imageSrc ? btnPrimary.boxShadow : "none",
+                  boxShadow: imageSrc ? (btnPrimary.boxShadow as string) : "none",
                   cursor: imageSrc ? "pointer" : "default",
                 }}
                 disabled={!imageSrc}
                 onClick={download}
               >
                 Download PNG
+              </button>
+              <button
+                type="button"
+                style={{
+                  ...btnSecondary,
+                  opacity: imageSrc ? 1 : 0.4,
+                  cursor: imageSrc ? "pointer" : "default",
+                }}
+                disabled={!imageSrc}
+                onClick={resetTransforms}
+              >
+                Reset view
               </button>
             </div>
 
@@ -439,6 +468,7 @@ export default function App() {
                 onPointerDown={onPointerDown}
                 onPointerMove={onPointerMove}
                 onPointerUp={onPointerUp}
+                onPointerLeave={onPointerLeave}
               />
               {!imageSrc && (
                 <div
@@ -483,9 +513,7 @@ export default function App() {
                   <button
                     key={o.key}
                     onClick={() => setSelectedKey(o.key)}
-                    style={
-                      selectedKey === o.key ? badgeBtnActive : badgeBtn
-                    }
+                    style={selectedKey === o.key ? badgeBtnActive : badgeBtn}
                   >
                     {o.label}
                   </button>
