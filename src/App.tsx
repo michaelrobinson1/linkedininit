@@ -1,15 +1,18 @@
 import React, { useRef, useState, useEffect } from "react";
 
 const OVERLAYS: { key: string; label: string; src: string }[] = [
-  { key: "nepobaby", label: "Nepo Baby", src: "/badges/nepobaby.png" },
-  { key: "underresourced", label: "Under Resourced", src: "/badges/underresourced.png" },
-  { key: "overqualified", label: "Over Qualified", src: "/badges/overqualified.png" },
-  { key: "underpaid", label: "Under Paid", src: "/badges/underpaid.png" },
-  { key: "burnedout", label: "Burned Out", src: "/badges/burnedout.png" },
-  { key: "quietquitting", label: "Quiet Quitting", src: "/badges/quietquitting.png" },
-  { key: "opentoretirement", label: "Open To Retirement", src: "/badges/opentoretirement.png" },
-  { key: "linkedinfluencer", label: "LinkedInfluencer", src: "/badges/linkedinfluencer.png" },
   { key: "b2bphilosopher", label: "B2BPhilosopher", src: "/badges/b2bphilosopher.png" },
+  { key: "burnedout", label: "Burned Out", src: "/badges/burnedout.png" },
+  { key: "impostersyndrome", label: "Imposter Syndrome", src: "/badges/impostersyndrome.png" },
+  { key: "linkedinfluencer", label: "LinkedInfluencer", src: "/badges/linkedinfluencer.png" },
+  { key: "nepobaby", label: "Nepo Baby", src: "/badges/nepobaby.png" },
+  { key: "opentoretirement", label: "Open To Retirement", src: "/badges/opentoretirement.png" },
+  { key: "overqualified", label: "Over Qualified", src: "/badges/overqualified.png" },
+  { key: "personalbrandceo", label: "Personal Brand CEO", src: "/badges/personalbrandceo.png" },
+  { key: "quietquitting", label: "Quiet Quitting", src: "/badges/quietquitting.png" },
+  { key: "teamofone", label: "Team of One", src: "/badges/teamofone.png" },
+  { key: "underpaid", label: "Under Paid", src: "/badges/underpaid.png" },
+  { key: "underresourced", label: "Under Resourced", src: "/badges/underresourced.png" },
 ];
 
 export default function App() {
@@ -97,7 +100,10 @@ export default function App() {
 
     const cx = S / 2;
     const cy = S / 2;
-    const radius = S * 0.5 - 6;
+
+    const ringWidth = 6;
+    // Radius so that the outer ring sits at exactly S/2 (aligns with overlay art)
+    const radius = S * 0.5 - ringWidth;
 
     ctx.save();
     ctx.beginPath();
@@ -123,9 +129,9 @@ export default function App() {
 
     // Outer subtle ring
     ctx.beginPath();
-    ctx.arc(cx, cy, radius + 6, 0, Math.PI * 2);
+    ctx.arc(cx, cy, radius + ringWidth, 0, Math.PI * 2);
     ctx.strokeStyle = "#e5e7eb";
-    ctx.lineWidth = 6;
+    ctx.lineWidth = ringWidth;
     ctx.stroke();
 
     // Overlay ring PNG
@@ -204,13 +210,13 @@ export default function App() {
     backgroundSize: "cover",
     backgroundPosition: "center",
     color: "#ffffff",
-    padding: "40px 0 56px", // reduced banner height
+    padding: "40px 0 56px",
   };
 
   const heroInnerStyle: React.CSSProperties = {
     maxWidth: 1120,
     margin: "0 auto",
-    padding: "0 24px", // horizontal padding only
+    padding: "0 24px",
   };
 
   const heroTitleStyle: React.CSSProperties = {
@@ -369,7 +375,7 @@ export default function App() {
           <h1 style={heroTitleStyle}>Linkedinnit</h1>
           <p
             style={{
-              marginTop: 8, // tightened
+              marginTop: 8,
               fontFamily: "AlecrimBlack, system-ui, sans-serif",
               fontSize: 26,
             }}
@@ -378,7 +384,7 @@ export default function App() {
           </p>
           <p
             style={{
-              marginTop: 4, // tightened
+              marginTop: 4,
               fontSize: 14,
               opacity: 0.9,
             }}
@@ -387,7 +393,7 @@ export default function App() {
           </p>
           <p
             style={{
-              marginTop: 12, // tightened
+              marginTop: 12,
               fontSize: 11,
               opacity: 0.85,
             }}
