@@ -178,7 +178,7 @@ export default function App() {
   const appStyle: React.CSSProperties = {
     minHeight: "100vh",
     margin: 0,
-    background: "#f8fafc",
+    background: "#f3f4f6",
     color: "#0f172a",
     fontFamily:
       '"Source Sans 3", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
@@ -197,19 +197,19 @@ export default function App() {
   const heroInnerStyle: React.CSSProperties = {
     maxWidth: 1120,
     margin: "0 auto",
-    padding: "44px 24px 12px",
+    padding: "32px 24px 20px", // tighter vertically
   };
 
   const heroTitleStyle: React.CSSProperties = {
     fontFamily: "AlecrimBlack, system-ui, sans-serif",
     fontWeight: 900,
-    fontSize: "44px",
+    fontSize: "60px", // bigger, bolder
     lineHeight: 1,
     letterSpacing: "-0.03em",
   };
 
   const mainWrapperStyle: React.CSSProperties = {
-    padding: "32px 24px 40px",
+    padding: "24px 24px 40px",
     flex: 1,
   };
 
@@ -220,17 +220,18 @@ export default function App() {
     gap: "16px",
   };
 
+  // 50/50 split on larger screens
   const mainGridWide: React.CSSProperties = {
     ...mainGridStyle,
-    gridTemplateColumns: "1.1fr 1fr",
+    gridTemplateColumns: "1fr 1fr",
     alignItems: "flex-start",
   };
 
   const cardStyle: React.CSSProperties = {
     background: "#ffffff",
-    borderRadius: 20,
+    borderRadius: 24,
     padding: 24,
-    boxShadow: "0 18px 45px rgba(15, 23, 42, 0.12)",
+    boxShadow: "0 24px 60px rgba(15, 23, 42, 0.16)",
   };
 
   const uploadRowStyle: React.CSSProperties = {
@@ -269,17 +270,19 @@ export default function App() {
   const canvasShellStyle: React.CSSProperties = {
     position: "relative",
     background: "#e5e7eb",
-    borderRadius: 18,
+    borderRadius: 20,
     overflow: "hidden",
     aspectRatio: "1 / 1",
     display: "grid",
     placeItems: "center",
+    width: "100%",
+    maxWidth: 520,       // LIMIT PREVIEW SIZE
+    margin: "0 auto",    // center it
   };
 
   const canvasStyle: React.CSSProperties = {
     width: "100%",
     height: "100%",
-    maxWidth: 700,
     display: "block",
   };
 
@@ -341,22 +344,22 @@ export default function App() {
           <img
             src="/assets/innit_logo.png"
             alt="innit"
-            style={{ height: 28, marginBottom: 16 }}
+            style={{ height: 32, marginBottom: 20 }}
           />
           <h1 style={heroTitleStyle}>Linkedinnit</h1>
           <p
             style={{
-              marginTop: 10,
+              marginTop: 12,
               fontFamily: "AlecrimBlack, system-ui, sans-serif",
-              fontSize: 22,
+              fontSize: 26,
             }}
           >
             Corporate realness.
           </p>
           <p
             style={{
-              marginTop: 4,
-              fontSize: 13,
+              marginTop: 6,
+              fontSize: 14,
               opacity: 0.9,
             }}
           >
@@ -385,9 +388,7 @@ export default function App() {
       {/* MAIN */}
       <main style={mainWrapperStyle}>
         <div
-          style={
-            window.innerWidth >= 900 ? mainGridWide : mainGridStyle
-          }
+          style={window.innerWidth >= 900 ? mainGridWide : mainGridStyle}
         >
           {/* Header row */}
           <header
@@ -396,10 +397,10 @@ export default function App() {
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              marginBottom: 4,
+              marginBottom: 8,
             }}
           >
-            <h2 style={{ fontSize: 20, fontWeight: 600, letterSpacing: "-0.02em" }}>
+            <h2 style={{ fontSize: 22, fontWeight: 600, letterSpacing: "-0.02em" }}>
               Generator
             </h2>
             <span style={{ fontSize: 12, opacity: 0.7 }}>v2.0</span>
@@ -465,7 +466,14 @@ export default function App() {
           </section>
 
           {/* RIGHT – Controls */}
-          <aside style={{ ...cardStyle, display: "flex", flexDirection: "column", gap: 16 }}>
+          <aside
+            style={{
+              ...cardStyle,
+              display: "flex",
+              flexDirection: "column",
+              gap: 16,
+            }}
+          >
             <div>
               <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>
                 Badge preset
